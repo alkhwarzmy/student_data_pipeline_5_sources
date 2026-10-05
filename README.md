@@ -1,109 +1,94 @@
-# Student Data Pipeline — Five-Source ETL & Data Integration
+# Student Data Pipeline
 
-مشروع **Data Engineering / ETL** يجمع بيانات الطلبة من خمسة مصادر مختلفة، ثم ينفذ الاستخراج والتنظيف والتحقق والدمج والتحويل وفحص الجودة النهائي.
+خط أنابيب بيانات تعليمي يجمع بيانات الطلبة من خمسة مصادر، ثم ينظفها ويتحقق منها ويدمجها ويحوّلها إلى مجموعة بيانات موحدة بصيغة CSV.
 
-## مصادر البيانات
+## نظرة عامة
 
-| المصدر | التقنية | الدور |
+| المصدر | التقنية | البيانات |
 |---|---|---|
 | CSV | Pandas | البيانات الأساسية للطالب |
-| Real REST API | Requests + JSON | بيانات ملف الطالب من API خارجي حقيقي |
-| PostgreSQL | Psycopg2 + SQL | GPA، الحضور، المقررات والدرجات |
+| REST API | Requests وJSON | اسم الطالب والمقرر |
+| PostgreSQL | Psycopg2 وSQL | المعدل والحضور والمقررات والدرجات |
 | MongoDB | PyMongo | البريد والهاتف وبيانات ولي الأمر |
-| Web Scraping | Requests + BeautifulSoup | وصف عام للتخصص من صفحات عامة |
+| Web scraping | Requests وBeautifulSoup | معلومات عامة عن التخصص |
 
-المسار:
+يمر التنفيذ بالمراحل التالية:
 
 ```text
-CSV + Real REST API + PostgreSQL + MongoDB + Web Scraping
-                         ↓
-                      Extract
-                         ↓
-                       Clean
-                         ↓
-                     Validate
-                         ↓
-                     Integrate
-                         ↓
-                     Transform
-                         ↓
-                Final Quality Check
-                         ↓
-                        Load
-                         ↓
-                 final_dataset.csv
+Extract → Clean → Validate → Integrate → Transform → Quality check → Load
 ```
 
-> **مهم:** المشروع لا يحتاج Docker. PostgreSQL وMongoDB في هذه النسخة يعملان كخدمات محلية على جهازك.
-
-> **مهم:** الـAPI عنوانه خارجي حقيقي، لذلك يحتاج اتصالًا بالإنترنت. وWeb Scraping يحتاج الإنترنت أيضًا.
+تعتمد مطابقة السجلات بين المصادر على `student_id`. المشروع معدّ للتشغيل محليًا، ولا يتطلب Docker.
 
 ## بنية المشروع
 
 ```text
-student_data_pipeline/
 ├── app/
-│   ├── sources/
-│   │   ├── csv_source.py
-│   │   ├── api_source.py
-│   │   ├── database_source.py
-│   │   ├── mongodb_source.py
-│   │   └── web_scraper.py
-│   ├── transformation/
-│   │   ├── cleaner.py
-│   │   ├── transformer.py
-│   │   └── integration.py
-│   ├── validation/
-│   │   └── quality.py
-│   ├── output/
-│   │   └── csv_writer.py
-│   └── utils/
-│       └── logger.py
+│   ├── sources/          # موصلات مصادر البيانات الخمسة
+│   ├── transformation/   # التنظيف والدمج والتحويل
+│   ├── validation/       # التحقق من جودة البيانات
+│   ├── output/           # كتابة ملفات النتائج
+│   └── utils/            # التسجيل والأدوات المساعدة
 ├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── rejected/
-├── database/
-│   ├── schema.sql
-│   ├── seed.sql
-│   ├── mongodb_seed.json
-│   └── seed_mongodb.py
-├── docs/
-│   └── PROJECT_DOCUMENTATION.md
-├── tests/
-├── .env.example
-├── .gitignore
-├── config.json
-├── main.py
-├── requirements.txt
-└── VERIFICATION_REPORT.md
+│   ├── mock/             # بيانات API محلية بديلة
+│   ├── raw/              # ملفات الإدخال
+│   ├── processed/        # مجموعة البيانات النهائية
+│   └── rejected/         # السجلات المرفوضة وأسبابها
+├── database/             # مخطط وبيانات PostgreSQL وMongoDB
+├── docs/                 # توثيق المشروع
+├── tests/                # الاختبارات
+├── config.json           # إعدادات المسارات والاتصالات
+├── main.py               # نقطة تشغيل خط الأنابيب
+└── requirements.txt      # اعتماديات Python
 ```
 
-## 1. PostgreSQL المحلي
+## المتطلبات
 
-يجب أن يكون PostgreSQL مثبتًا ويعمل على جهازك.
+- Python و`pip`.
+- PostgreSQL يعمل محليًا، مع قاعدة بيانات باسم `student_pipeline`.
+- MongoDB يعمل محليًا على `mongodb://localhost:27017`.
+- اتصال بالإنترنت لجلب بيانات REST API ومعلومات التخصص. عند تعذّر REST API، يستخدم المشروع بيانات Mock محلية؛ وتعذّر جلب صفحات الويب لا يوقف بقية خط الأنابيب.
 
-الإعداد الافتراضي:
+## الإعداد
 
-```text
-Host: localhost
-Port: 5432
-Database: student_pipeline
-User: postgres
+### 1. تثبيت الاعتماديات
+
+من مجلد المشروع، أنشئ بيئة افتراضية وفعّلها:
+
+```bash
+python -m venv .venv
 ```
 
-أنشئ قاعدة البيانات `student_pipeline` من pgAdmin أو psql، ثم شغّل:
+على Windows:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+على macOS أو Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+ثم ثبّت الحزم:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. إعداد PostgreSQL
+
+أنشئ قاعدة بيانات باسم `student_pipeline` باستخدام pgAdmin أو `psql`. بعد ذلك نفّذ الملفين التاليين على القاعدة، بهذا الترتيب:
 
 ```text
 database/schema.sql
 database/seed.sql
 ```
 
-لإنشاء الجداول وإدخال البيانات التجريبية.
+ينشئ `schema.sql` الجداول، ويضيف `seed.sql` بيانات تجريبية. إذا كان اسم المستخدم أو كلمة المرور مختلفًا عن الإعداد المحلي، انسخ `.env.example` إلى `.env` وعدّل قيم PostgreSQL. يستخدم التطبيق متغيرات البيئة التالية للاتصال:
 
-إذا كانت كلمة مرور PostgreSQL مختلفة، أنشئ `.env` من `.env.example` وضع كلمة المرور الصحيحة:
-
-```text
+```dotenv
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_DB=student_pipeline
@@ -111,13 +96,9 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=YOUR_PASSWORD
 ```
 
-لا ترفع `.env` إلى GitHub.
+### 3. إعداد MongoDB
 
-## 2. MongoDB المحلي
-
-يجب أن تكون خدمة MongoDB مثبتة وتعمل على جهازك.
-
-الإعداد الافتراضي:
+تأكد من تشغيل خدمة MongoDB. يقرأ التطبيق عنوان الاتصال واسم قاعدة البيانات والمجموعة من `config.json`، والقيم الافتراضية هي:
 
 ```text
 URI: mongodb://localhost:27017
@@ -125,185 +106,80 @@ Database: student_pipeline
 Collection: student_profiles
 ```
 
-بعد تشغيل MongoDB، نفذ من مجلد المشروع:
+لتحميل بيانات العينة إلى MongoDB، نفّذ:
 
 ```bash
 python database/seed_mongodb.py
 ```
 
-سيقرأ `database/mongodb_seed.json` ويضيف بيانات ملفات الطلبة إلى مجموعة `student_profiles`.
+**تنبيه:** هذا السكربت يحذف جميع المستندات الموجودة في مجموعة `student_profiles` قبل تحميل بيانات العينة. لا تشغّله على مجموعة تحتوي بيانات تريد الاحتفاظ بها.
 
-مصدر MongoDB موجود في:
+## إعداد المصادر
 
-```text
-app/sources/mongodb_source.py
-```
+### REST API
 
-ويقرأ الحقول:
+عنوان الخدمة الافتراضي موجود في `config.json`. يضيف التطبيق قيمة `api_student_id_offset` إلى المعرّف القادم من API لمطابقته مع معرّفات المشروع؛ القيمة الافتراضية هي `1000`، لذلك يصبح المعرّف `1` هو `1001`.
 
-- `student_id`
-- `email`
-- `phone`
-- `guardian_name`
-
-ويتم الربط مع بقية المصادر باستخدام `student_id`.
-
-## 3. Real REST API
-
-المشروع يستخدم:
-
-```text
-https://api.ajitdev.com/api/student?limit=150
-```
-
-الكود يحول:
-
-```text
-id     → student_id
-name   → api_name
-course → api_course
-```
-
-وبما أن بيانات المشروع تستخدم IDs تبدأ من `1001`، فإن:
+إذا تعذر الاتصال بالخدمة الحقيقية أو كانت استجابتها غير صالحة، يحاول التطبيق استخدام `mock_api_url` إن تم ضبطه، ثم ينتقل إلى الملف المحلي `data/mock/api_students.json`. يمكن ضبط خيارات الاحتياط في `config.json`:
 
 ```json
-"api_student_id_offset": 1000
+{
+  "mock_api_url": "",
+  "mock_api_timeout": 10,
+  "mock_api_data_path": "data/mock/api_students.json"
+}
 ```
 
-يحوّل API ID `1` إلى `1001`.
+تتوقع محوّلات API حقول `id` و`name`، ويمكنها استخدام `course` عند توفره.
 
-## 3.1 آلية الاحتياط للـAPI (Real API → Mock API)
+### Web scraping
 
-عند تشغيل الـPipeline يحاول المشروع الاتصال أولًا بالـReal REST API الموجود في `api_url`.
+يجلب التطبيق عنوان الصفحة وفقرتها الأولى من صفحات عامة مرتبطة بالتخصص. إذا لم يتوفر اتصال بالإنترنت أو فشل طلب صفحة، يسجل التحذير ويتابع بمعطيات ويب فارغة لذلك التخصص.
 
-إذا حدث أي من الآتي:
-- انقطاع الإنترنت أو فشل الاتصال.
-- انتهاء مهلة الاتصال.
-- خطأ HTTP.
-- استجابة JSON غير صحيحة أو ناقصة.
+## التشغيل
 
-فسيحوّل التنفيذ تلقائيًا إلى **Mock API**.
-
-ترتيب الاحتياط هو:
-
-```text
-Real API
-   ↓ فشل الاتصال/الاستجابة
-Remote Mock API (إذا تم وضع رابط في mock_api_url)
-   ↓ غير متاح
-Local Mock API
-   ↓
-data/mock/api_students.json
-```
-
-في النسخة الحالية تم تضمين بيانات Mock محلية حتى يستطيع المشروع العمل حتى عند عدم وجود إنترنت.
-
-الإعدادات في `config.json`:
-
-```json
-"mock_api_url": "",
-"mock_api_timeout": 10,
-"mock_api_data_path": "data/mock/api_students.json"
-```
-
-إذا كان لديك رابط Mock API خارجي من خدمة مثل MockAPI، ضعه في `mock_api_url`، وسيحاول المشروع استخدامه قبل الانتقال إلى الملف المحلي.
-
-## 4. Web Scraping
-
-الملف:
-
-```text
-app/sources/web_scraper.py
-```
-
-يستخدم Requests وBeautifulSoup لاستخراج عنوان الصفحة والفقرة الأولى والرابط من صفحات عامة حسب التخصص.
-
-## 5. التثبيت
-
-أنشئ بيئة افتراضية:
-
-```bash
-python -m venv .venv
-```
-
-Windows:
-
-```bash
-.venv\Scripts\activate
-```
-
-ثم:
-
-```bash
-pip install -r requirements.txt
-```
-
-## 6. التشغيل الكامل
-
-### الخطوة 1 — شغّل PostgreSQL
-
-تأكد من أن خدمة PostgreSQL تعمل وأن قاعدة `student_pipeline` موجودة والجداول والبيانات تم إنشاؤها.
-
-### الخطوة 2 — شغّل MongoDB
-
-تأكد من أن خدمة MongoDB تعمل، ثم نفذ مرة واحدة:
-
-```bash
-python database/seed_mongodb.py
-```
-
-### الخطوة 3 — أنشئ `.env`
-
-انسخ `.env.example` إلى `.env` وعدل كلمة مرور PostgreSQL إذا لزم.
-
-### الخطوة 4 — شغّل الـPipeline
+بعد إعداد PostgreSQL وMongoDB وتحميل بيانات MongoDB التجريبية، شغّل من جذر المشروع:
 
 ```bash
 python main.py
 ```
 
-الناتج:
+ينشئ التشغيل الملفات التالية:
 
-```text
-data/processed/final_dataset.csv
-data/rejected/rejected_records.csv
-logs/pipeline.log
-```
+| الملف | المحتوى |
+|---|---|
+| `data/processed/final_dataset.csv` | مجموعة البيانات النهائية بعد الدمج والتحويل |
+| `data/rejected/rejected_records.csv` | السجلات المرفوضة ومصدرها وسبب الرفض |
+| `logs/pipeline.log` | سجل مراحل التنفيذ والملخص |
 
-## 7. الاختبارات
+يتوقف التنفيذ مع خطأ إذا لم تنجح فحوص الجودة النهائية.
+
+## الاختبارات
+
+شغّل الاختبارات من جذر المشروع:
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-## 8. Data Quality
+بعض الاختبارات وحداتية ولا تحتاج اتصالًا بقواعد البيانات. اختبار النتيجة النهائية يعتمد على وجود ملف ناتج من تشغيل خط الأنابيب.
 
-القواعد الأساسية:
+## قواعد جودة البيانات
 
-- `student_id` غير فارغ.
+- يجب أن يكون `student_id` موجودًا وفريدًا في الناتج النهائي.
 - العمر بين 16 و80.
-- GPA بين 0 و4.
-- Attendance بين 0 و100.
-- Score بين 0 و100.
-- البريد الإلكتروني في MongoDB غير فارغ.
-- معرف الطالب فريد في الناتج النهائي.
+- المعدل التراكمي `GPA` بين 0 و4.
+- الحضور بين 0 و100.
+- الدرجة بين 0 و100.
+- يجب أن يتوفر بريد إلكتروني غير فارغ في سجلات MongoDB.
+- تُسجل السجلات غير الصالحة في ملف المرفوضات مع سبب الرفض.
 
-## 9. لماذا PostgreSQL وMongoDB معًا؟
+## الأمان والبيانات
 
-PostgreSQL قاعدة بيانات **Relational** مناسبة للبيانات المنظمة والعلاقات بين الطالب والمقرر والتسجيل والدرجات.
+- لا ترفع ملف `.env` أو كلمات المرور أو مفاتيح الوصول إلى GitHub.
+- استخدم بيانات تجريبية فقط، ولا تضع بيانات طلبة حقيقية أو حساسة في المستودع.
+- يتجاهل `.gitignore` ملف `.env` وملفات السجل.
 
-MongoDB قاعدة بيانات **Document** مناسبة لبيانات الملف الشخصي التي يمكن أن تتغير بنيتها بسهولة.
+## التوثيق
 
-وجود الاثنين في نفس الـPipeline يوضح القدرة على دمج مصادر SQL وNoSQL، وهي نقطة مهمة في مشاريع Data Engineering.
-
-## 10. ملاحظات GitHub
-
-لا ترفع:
-
-- `.env`
-- كلمات المرور
-- مفاتيح API
-- بيانات طلاب حقيقية أو حساسة
-- ملفات السجلات `*.log`
-
-ملف `.gitignore` يحتوي على `.env` وملفات السجلات.
+للتفاصيل الإضافية، راجع [توثيق المشروع](docs/PROJECT_DOCUMENTATION.md) و[تقرير التحقق](VERIFICATION_REPORT.md).
