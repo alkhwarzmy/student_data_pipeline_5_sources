@@ -1,0 +1,81 @@
+{
+  "status": "success",
+  "count": 15,
+  "data": [
+    {
+      "id": 1,
+      "name": "Aarav Sharma",
+      "course": "Computer Science"
+    },
+    {
+      "id": 2,
+      "name": "Diya Patel",
+      "course": "Data Science"
+    },
+    {
+      "id": 3,
+      "name": "Kabir Singh",
+      "course": "Information Systems"
+    },
+    {
+      "id": 4,
+      "name": "Anaya Gupta",
+      "course": "Artificial Intelligence"
+    },
+    {
+      "id": 5,
+      "name": "Rohan Mehta",
+      "course": "Cyber Security"
+    },
+    {
+      "id": 6,
+      "name": "Ishita Rao",
+      "course": "Computer Science"
+    },
+    {
+      "id": 7,
+      "name": "Arjun Kumar",
+      "course": "Data Science"
+    },
+    {
+      "id": 8,
+      "name": "Meera Shah",
+      "course": "Information Systems"
+    },
+    {
+      "id": 9,
+      "name": "Vikram Joshi",
+      "course": "Artificial Intelligence"
+    },
+    {
+      "id": 10,
+      "name": "Nisha Verma",
+      "course": "Cyber Security"
+    },
+    {
+      "id": 11,
+      "name": "Rahul Nair",
+      "course": "Computer Science"
+    },
+    {
+      "id": 12,
+      "name": "Pooja Iyer",
+      "course": "Data Science"
+    },
+    {
+      "id": 13,
+      "name": "Karan Malhotra",
+      "course": "Information Systems"
+    },
+    {
+      "id": 14,
+      "name": "Sneha Kapoor",
+      "course": "Artificial Intelligence"
+    },
+    {
+      "id": 15,
+      "name": "Aditya Das",
+      "course": "Cyber Security"
+    }
+  ]
+}

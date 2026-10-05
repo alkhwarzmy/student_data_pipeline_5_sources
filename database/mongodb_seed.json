@@ -1,0 +1,17 @@
+[
+  {"student_id": 1001, "email": "student1001@example.com", "phone": "+967700001001", "guardian_name": "Ahmed Ali"},
+  {"student_id": 1002, "email": "student1002@example.com", "phone": "+967700001002", "guardian_name": "Mohammed Hassan"},
+  {"student_id": 1003, "email": "student1003@example.com", "phone": "+967700001003", "guardian_name": "Ali Saleh"},
+  {"student_id": 1004, "email": "student1004@example.com", "phone": "+967700001004", "guardian_name": "Hassan Ahmed"},
+  {"student_id": 1005, "email": "student1005@example.com", "phone": "+967700001005", "guardian_name": "Saleh Mohammed"},
+  {"student_id": 1006, "email": "student1006@example.com", "phone": "+967700001006", "guardian_name": "Abdullah Ali"},
+  {"student_id": 1007, "email": "student1007@example.com", "phone": "+967700001007", "guardian_name": "Khaled Hassan"},
+  {"student_id": 1008, "email": "student1008@example.com", "phone": "+967700001008", "guardian_name": "Nasser Saleh"},
+  {"student_id": 1009, "email": "student1009@example.com", "phone": "+967700001009", "guardian_name": "Yahya Ahmed"},
+  {"student_id": 1010, "email": "student1010@example.com", "phone": "+967700001010", "guardian_name": "Omar Ali"},
+  {"student_id": 1011, "email": "student1011@example.com", "phone": "+967700001011", "guardian_name": "Ibrahim Hassan"},
+  {"student_id": 1012, "email": "student1012@example.com", "phone": "+967700001012", "guardian_name": "Fahad Mohammed"},
+  {"student_id": 1013, "email": "student1013@example.com", "phone": "+967700001013", "guardian_name": "Samir Ali"},
+  {"student_id": 1014, "email": "student1014@example.com", "phone": "+967700001014", "guardian_name": "Tareq Saleh"},
+  {"student_id": 1015, "email": "student1015@example.com", "phone": "+967700001015", "guardian_name": "Majed Ahmed"}
+]

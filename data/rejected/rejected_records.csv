@@ -1,0 +1,9 @@
+﻿source,student_id,error_reason
+CSV,1005,Missing age
+CSV,1007,Invalid Age
+POSTGRESQL,1005,Invalid GPA
+POSTGRESQL,1005,Invalid GPA
+POSTGRESQL,1007,Invalid GPA
+POSTGRESQL,1007,Invalid GPA
+POSTGRESQL,1009,Invalid Attendance
+POSTGRESQL,1009,Invalid Attendance

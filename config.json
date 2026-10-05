@@ -1,0 +1,25 @@
+{
+  "csv_path": "data/raw/students.csv",
+  "api_url": "https://api.ajitdev.com/api/student?limit=150",
+  "api_timeout": 15,
+  "api_student_id_offset": 1000,
+  "web_timeout": 15,
+  "processed_path": "data/processed/final_dataset.csv",
+  "rejected_path": "data/rejected/rejected_records.csv",
+  "log_path": "logs/pipeline.log",
+  "postgres": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "student_pipeline",
+    "user": "postgres"
+  },
+  "mongodb": {
+    "uri": "mongodb://localhost:27017",
+    "database": "student_pipeline",
+    "collection": "student_profiles",
+    "server_selection_timeout_ms": 5000
+  },
+  "mock_api_url": "",
+  "mock_api_timeout": 10,
+  "mock_api_data_path": "data/mock/api_students.json"
+}
